@@ -1,6 +1,7 @@
 
 # Token types:
-INTEGER, PLUS, EOF, MINUS = 'INTEGER', 'PLUS', 'EOF', 'MINUS'
+(INTEGER, PLUS, EOF, MINUS,
+ DIVIDE, MULTIPLY) = 'INTEGER', 'PLUS', 'EOF', 'MINUS', 'DIVIDE', 'MULTIPLY'
 
 
 class Token(object):

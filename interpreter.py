@@ -46,6 +46,14 @@ class Interpreter(object):
                 self.advance()
                 return token.Token(token.MINUS, self.curr_char)
 
+            elif self.curr_char == '*':
+                self.advance()
+                return token.Token(token.MULTIPLY, self.curr_char)
+
+            elif self.curr_char == '/':
+                self.advance()
+                return token.Token(token.DIVIDE, self.curr_char)
+
             self.error()
 
         return token.Token(token.EOF, None)
@@ -69,6 +77,10 @@ class Interpreter(object):
             self.eat('PLUS')
         elif operand.type == token.MINUS:
             self.eat('MINUS')
+        elif operand.type == token.MULTIPLY:
+            self.eat('MULTIPLY')
+        elif operand.type == token.DIVIDE:
+            self.eat('DIVIDE')
 
         right = self.curr_token
         self.eat('INTEGER')
@@ -77,3 +89,7 @@ class Interpreter(object):
             return left.value + right.value
         elif operand.type == token.MINUS:
             return left.value - right.value
+        elif operand.type == token.MULTIPLY:
+            return left.value / right.value
+        elif operand.type == token.DIVIDE:
+            return left.value / right.value
