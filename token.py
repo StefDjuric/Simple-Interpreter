@@ -1,14 +1,12 @@
 
 # Token types:
-(INTEGER, PLUS, EOF, MINUS,
- DIVIDE, MULTIPLY) = 'INTEGER', 'PLUS', 'EOF', 'MINUS', 'DIVIDE', 'MULTIPLY'
+INTEGER, PLUS, EOF, MINUS, DIVIDE, MULTIPLY = 'INTEGER', 'PLUS', 'EOF', 'MINUS', 'DIVIDE', 'MULTIPLY'
 
 
 class Token(object):
 
     def __init__(self, type, value):
         self.type = type
-        # Value can be 0-9 or PLUS or None
         self.value = value
 
     def __str__(self):

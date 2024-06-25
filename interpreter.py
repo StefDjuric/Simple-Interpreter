@@ -2,94 +2,60 @@ import token
 
 
 class Interpreter(object):
+    def __init__(self, lexer):
+        self.lexer = lexer
+        self.curr_token: token.Token = self.lexer.tokenizer()
 
-    def __init__(self, text):
-        # text as in code that gets interpreted
-        self.text = text.replace(' ', '')
-        # index position of text
-        self.curr_idx_position = 0
-        self.curr_token: token.Token = None
-        self.curr_char = self.text[self.curr_idx_position]
-
-    def error(self) -> None:
-        raise Exception('Error parsing input')
-
-    def advance(self):
-        """Advance the 'curr_idx_position' pointer and set the 'current_char' variable."""
-        self.curr_idx_position += 1
-        if self.curr_idx_position > len(self.text) - 1:
-            self.curr_char = None  # Indicates end of input
-        else:
-            self.curr_char = self.text[self.curr_idx_position]
-
-    def integer(self):
-        """Return a (multidigit) integer consumed from the input."""
-        integer_buffer = ''
-        while self.curr_char is not None and self.curr_char.isdigit():
-            integer_buffer += self.curr_char
-            self.advance()
-        return int(integer_buffer)
-
-    def tokenizer(self) -> token.Token:
-        """This method breaks text down into tokens"""
-
-        while self.curr_char is not None:
-
-            if self.curr_char.isdigit():
-                return token.Token(token.INTEGER, self.integer())
-
-            elif self.curr_char == '+':
-                self.advance()
-                return token.Token(token.PLUS, self.curr_char)
-
-            elif self.curr_char == '-':
-                self.advance()
-                return token.Token(token.MINUS, self.curr_char)
-
-            elif self.curr_char == '*':
-                self.advance()
-                return token.Token(token.MULTIPLY, self.curr_char)
-
-            elif self.curr_char == '/':
-                self.advance()
-                return token.Token(token.DIVIDE, self.curr_char)
-
-            self.error()
-
-        return token.Token(token.EOF, None)
+    def error(self):
+        raise Exception('Invalid syntax')
 
     def eat(self, token_type) -> None:
 
         if self.curr_token.type == token_type:
-            self.curr_token = self.tokenizer()
+            self.curr_token = self.lexer.tokenizer()
         else:
             self.error()
 
-    def expression(self) -> int:
-        """INTEGER PLUS INTEGER"""
-        self.curr_token = self.tokenizer()
+    def factor(self) -> int:
+        """Returns an INTEGER taken value """
 
-        left = self.curr_token
+        this_token = self.curr_token
         self.eat('INTEGER')
+        return this_token.value
 
-        operand = self.curr_token
-        if operand.type == token.PLUS:
-            self.eat('PLUS')
-        elif operand.type == token.MINUS:
-            self.eat('MINUS')
-        elif operand.type == token.MULTIPLY:
-            self.eat('MULTIPLY')
-        elif operand.type == token.DIVIDE:
-            self.eat('DIVIDE')
+    def term(self) -> int:
+        """Returns the value of a higher priority (DIV, MUL) expression"""
+        # self.curr_token = self.tokenizer()
 
-        right = self.curr_token
-        self.eat('INTEGER')
+        result = self.factor()
 
-        if operand.type == token.PLUS:
-            return left.value + right.value
-        elif operand.type == token.MINUS:
-            return left.value - right.value
-        elif operand.type == token.MULTIPLY:
-            return left.value / right.value
-        elif operand.type == token.DIVIDE:
-            return left.value / right.value
+        while self.curr_token.type in (token.MULTIPLY, token.DIVIDE):
+            this_token = self.curr_token
+
+            if this_token.type == token.MULTIPLY:
+                self.eat('MULTIPLY')
+                result *= self.factor()
+            elif this_token.type == token.DIVIDE:
+                self.eat('DIVIDE')
+                result /= self.factor()
+        return result
+
+    def expression(self):
+        result = self.term()
+
+        while self.curr_token.type in (token.PLUS, token.MINUS):
+            this_token = self.curr_token
+            if this_token.type == token.PLUS:
+                self.eat('PLUS')
+                result += self.term()
+            elif this_token.type == token.MINUS:
+                self.eat('MINUS')
+                result -= self.term()
+        return result
+
+
+
+
+
+
+

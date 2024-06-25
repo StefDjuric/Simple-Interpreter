@@ -1,4 +1,5 @@
 import interpreter
+from lexer import Lexer
 
 
 def main():
@@ -10,7 +11,8 @@ def main():
         if not text:
             continue
 
-        interpret = interpreter.Interpreter(text)
+        lexer = Lexer(text)
+        interpret = interpreter.Interpreter(lexer)
         result = interpret.expression()
         print(result)
 
