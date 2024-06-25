@@ -12,7 +12,7 @@ class Lexer(object):
     def error(self) -> None:
         raise Exception('Invalid character')
 
-    def advance(self):
+    def advance(self) -> None:
         """Advance the 'curr_idx_position' pointer and set the 'current_char' variable."""
         self.curr_idx_position += 1
         if self.curr_idx_position > len(self.text) - 1:
@@ -51,6 +51,14 @@ class Lexer(object):
             elif self.curr_char == '/':
                 self.advance()
                 return token.Token(token.DIVIDE, self.curr_char)
+
+            elif self.curr_char == '(':
+                self.advance()
+                return token.Token(token.LPARAN, self.curr_char)
+
+            elif self.curr_char == ')':
+                self.advance()
+                return token.Token(token.RPARAN, self.curr_char)
 
             self.error()
 

@@ -20,8 +20,16 @@ class Interpreter(object):
         """Returns an INTEGER taken value """
 
         this_token = self.curr_token
-        self.eat('INTEGER')
-        return this_token.value
+
+        if this_token.type == token.INTEGER:
+            self.eat('INTEGER')
+            return this_token.value
+
+        elif this_token.type == token.LPARAN:
+            self.eat(token.LPARAN)
+            result = self.expression()
+            self.eat(token.RPARAN)
+            return result
 
     def term(self) -> int:
         """Returns the value of a higher priority (DIV, MUL) expression"""
@@ -41,6 +49,7 @@ class Interpreter(object):
         return result
 
     def expression(self):
+        # Priority expression
         result = self.term()
 
         while self.curr_token.type in (token.PLUS, token.MINUS):
