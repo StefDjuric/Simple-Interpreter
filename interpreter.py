@@ -1,7 +1,8 @@
 import token
+import AST
 
 
-class Interpreter(object):
+class Parser(object):
     def __init__(self, lexer):
         self.lexer = lexer
         self.curr_token: token.Token = self.lexer.tokenizer()
@@ -16,55 +17,86 @@ class Interpreter(object):
         else:
             self.error()
 
-    def factor(self) -> int:
+    def factor(self):
         """Returns an INTEGER taken value """
 
         this_token = self.curr_token
 
         if this_token.type == token.INTEGER:
             self.eat('INTEGER')
-            return this_token.value
+            return AST.Number(this_token)
 
         elif this_token.type == token.LPARAN:
             self.eat(token.LPARAN)
-            result = self.expression()
+            node = self.expression()
             self.eat(token.RPARAN)
-            return result
+            return node
 
-    def term(self) -> int:
+    def term(self) -> AST.BinaryOperatorNode:
         """Returns the value of a higher priority (DIV, MUL) expression"""
         # self.curr_token = self.tokenizer()
 
-        result = self.factor()
+        node = self.factor()
 
         while self.curr_token.type in (token.MULTIPLY, token.DIVIDE):
             this_token = self.curr_token
 
             if this_token.type == token.MULTIPLY:
                 self.eat('MULTIPLY')
-                result *= self.factor()
+                # result *= self.factor()
             elif this_token.type == token.DIVIDE:
                 self.eat('DIVIDE')
-                result /= self.factor()
-        return result
+                # result /= self.factor()
 
-    def expression(self):
+            node = AST.BinaryOperatorNode(left_node=node, operator=this_token, right_node=self.factor())
+        return node
+
+    def expression(self) -> AST.BinaryOperatorNode:
         # Priority expression
-        result = self.term()
+        node = self.term()
 
         while self.curr_token.type in (token.PLUS, token.MINUS):
             this_token = self.curr_token
             if this_token.type == token.PLUS:
                 self.eat('PLUS')
-                result += self.term()
+                # result += self.term()
             elif this_token.type == token.MINUS:
                 self.eat('MINUS')
-                result -= self.term()
-        return result
+                # result -= self.term()
+            node = AST.BinaryOperatorNode(left_node=node, operator=this_token, right_node=self.term())
+        return node
+
+    def parse(self):
+        return self.expression()
 
 
+class NodeVisitor(object):
+    def visit(self, node):
+        method_name = 'visit_' + type(node).__name__
+        visitor = getattr(self, method_name, self.generic_visit)
+        return visitor(node)
+
+    def generic_visit(self, node):
+        raise Exception('No visit_{} method'.format(type(node.__name__)))
 
 
+class Interpreter(NodeVisitor):
+    def __init__(self, parser):
+        self.parser = parser
 
+    def visit_BinaryOperatorNode(self, node: AST.BinaryOperatorNode):
+        if node.operator.type == token.PLUS:
+            return self.visit(node.left_node) + self.visit(node.right_node)
+        elif node.operator.type == token.MINUS:
+            return self.visit(node.left_node) - self.visit(node.right_node)
+        elif node.operator.type == token.MULTIPLY:
+            return self.visit(node.left_node) * self.visit(node.right_node)
+        elif node.operator.type == token.DIVIDE:
+            return self.visit(node.left_node) / self.visit(node.right_node)
 
+    def visit_Number(self, node: AST.Number):
+        return node.value
 
+    def interpret(self):
+        tree = self.parser.parse()
+        return self.visit(tree)
