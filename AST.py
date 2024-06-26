@@ -5,6 +5,14 @@ class AbstractSyntaxTree(object):
     pass
 
 
+class UnaryOperatorNode(AbstractSyntaxTree):
+
+    def __init__(self, operator, expression):
+        self.token = self.operator = operator
+        # expression represents an AST node
+        self.expression = expression
+
+
 # Operator representation
 class BinaryOperatorNode(AbstractSyntaxTree):
 

@@ -18,13 +18,23 @@ class Parser(object):
             self.error()
 
     def factor(self):
-        """Returns an INTEGER taken value """
+        """Returns a operator or number node taken value """
 
         this_token = self.curr_token
 
         if this_token.type == token.INTEGER:
             self.eat('INTEGER')
             return AST.Number(this_token)
+
+        elif this_token.type == token.PLUS:
+            self.eat('PLUS')
+            node = AST.UnaryOperatorNode(this_token, self.factor())
+            return node
+
+        elif this_token.type == token.MINUS:
+            self.eat('MINUS')
+            node = AST.UnaryOperatorNode(this_token, self.factor())
+            return node
 
         elif this_token.type == token.LPARAN:
             self.eat(token.LPARAN)
@@ -93,6 +103,14 @@ class Interpreter(NodeVisitor):
             return self.visit(node.left_node) * self.visit(node.right_node)
         elif node.operator.type == token.DIVIDE:
             return self.visit(node.left_node) / self.visit(node.right_node)
+
+    def visit_UnaryOperatorNode(self, node: AST.UnaryOperatorNode):
+        operator = node.operator.type
+
+        if operator == token.PLUS:
+            return +self.visit(node.expression)
+        elif operator == token.MINUS:
+            return -self.visit(node.expression)
 
     def visit_Number(self, node: AST.Number):
         return node.value
