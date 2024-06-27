@@ -1,4 +1,4 @@
-import token
+import my_tokens
 
 
 class AbstractSyntaxTree(object):
@@ -25,6 +25,33 @@ class BinaryOperatorNode(AbstractSyntaxTree):
 # Integer representation
 class Number(AbstractSyntaxTree):
 
-    def __init__(self, token: token.Token):
+    def __init__(self, token: my_tokens.Token):
         self.token = token
         self.value = token.value
+
+
+class Compound(AbstractSyntaxTree):
+    """Represents a BEGIN ... END block"""
+
+    def __init__(self):
+        self.children = []
+
+
+class Assign(AbstractSyntaxTree):
+
+    def __init__(self, left_node, operator, right_node):
+        self.left_node = left_node
+        self.right_node = right_node
+        self.token = self.operator = operator
+
+
+class Variable(AbstractSyntaxTree):
+    """The variable node is constructed using ID tokens"""
+
+    def __init__(self, this_token: my_tokens.Token):
+        self.token = this_token
+        self.value = this_token.value
+
+
+class NoStatements(object):
+    pass

@@ -14,8 +14,8 @@ def main():
         lexer = Lexer(text)
         parser = interpreter.Parser(lexer)
         this_interpreter = interpreter.Interpreter(parser)
-        result = this_interpreter.interpret()
-        print(result)
+        this_interpreter.interpret()
+        print(this_interpreter.GLOBAL_SCOPE)
 
 
 if __name__ == '__main__':
