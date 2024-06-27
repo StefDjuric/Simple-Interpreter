@@ -3,6 +3,11 @@ import my_tokens
 RESERVED_KEYWORDS = {
     'BEGIN': my_tokens.Token('BEGIN', 'BEGIN'),
     'END': my_tokens.Token('END', 'END'),
+    'PROGRAM': my_tokens.Token('PROGRAM', 'PROGRAM'),
+    'VAR': my_tokens.Token('VAR', 'VAR'),
+    'DIV': my_tokens.Token('DIV', 'DIV'),
+    'INTEGER': my_tokens.Token('INTEGER', 'INTEGER'),
+    'REAL': my_tokens.Token('REAL', 'REAL'),
 }
 
 
@@ -21,6 +26,11 @@ class Lexer(object):
         while self.curr_char is not None and self.curr_char.isspace():
             self.advance()
 
+    def skip_comment(self):
+        while self.curr_char != '}':
+            self.advance()
+        self.advance()
+
     def advance(self) -> None:
         """Advance the 'curr_idx_position' pointer and set the 'current_char' variable."""
         self.curr_idx_position += 1
@@ -29,13 +39,24 @@ class Lexer(object):
         else:
             self.curr_char = self.text[self.curr_idx_position]
 
-    def integer(self):
-        """Returns a (multi digit) integer consumed from the input."""
-        integer_buffer = ''
+    def number(self):
+        """Returns a (multi digit) number(float const or integer const) consumed from the input."""
+        number_buffer = ''
         while self.curr_char is not None and self.curr_char.isdigit():
-            integer_buffer += self.curr_char
+            number_buffer += self.curr_char
             self.advance()
-        return int(integer_buffer)
+
+        if self.curr_char == '.':
+            number_buffer += self.curr_char
+            self.advance()
+
+            while self.curr_char is not None and self.curr_char.isdigit():
+                number_buffer += self.curr_char
+                self.advance()
+            this_token = my_tokens.Token('REAL_CONST', float(number_buffer))
+        else:
+            this_token = my_tokens.Token('INTEGER_CONST', int(number_buffer))
+        return this_token
 
     def peek(self):
         """Peeks into the next position of the text without moving the index position"""
@@ -60,7 +81,20 @@ class Lexer(object):
         while self.curr_char is not None:
 
             if self.curr_char.isdigit():
-                return my_tokens.Token(my_tokens.INTEGER, self.integer())
+                return self.number()
+
+            elif self.curr_char == '{':
+                self.advance()
+                self.skip_comment()
+                continue
+
+            elif self.curr_char == ':':
+                self.advance()
+                return my_tokens.Token(my_tokens.COLON, ':')
+
+            elif self.curr_char == ',':
+                self.advance()
+                return my_tokens.Token(my_tokens.COMMA, ',')
 
             elif self.curr_char.isspace():
                 self.skip_whitespace()
@@ -96,7 +130,7 @@ class Lexer(object):
 
             elif self.curr_char == '/':
                 self.advance()
-                return my_tokens.Token(my_tokens.DIVIDE, '/')
+                return my_tokens.Token(my_tokens.FLOAT_DIV, '/')
 
             elif self.curr_char == '(':
                 self.advance()

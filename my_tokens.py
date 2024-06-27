@@ -1,10 +1,15 @@
-
 # Token types:
 (INTEGER, PLUS, EOF, MINUS,
  DIVIDE, MULTIPLY,
  LPARAN, RPARAN, BEGIN,
  END, DOT, ASSIGN,
- SEMI, ID) = 'INTEGER', 'PLUS', 'EOF', 'MINUS', 'DIVIDE', 'MULTIPLY', '(', ')', 'BEGIN', 'END', 'DOT', 'ASSIGN', 'SEMI', 'ID'
+ SEMI, ID, PROGRAM, VAR, INTEGER_DIV,
+ FLOAT_DIV, COLON, COMMA,
+ REAL, INTEGER_CONST, REAL_CONST,) = ('INTEGER', 'PLUS', 'EOF', 'MINUS', 'DIVIDE',
+                                      'MULTIPLY', '(', ')', 'BEGIN',
+                                      'END', 'DOT', 'ASSIGN', 'SEMI', 'ID', 'PROGRAM',
+                                      'VAR', 'INTEGER_DIV', 'FLOAT_DIV', 'COLON', 'COMMA', 'REAL', 'INTEGER_CONST',
+                                      'REAL_CONST')
 
 
 class Token(object):
@@ -21,5 +26,3 @@ class Token(object):
     def __repr__(self):
         """Returns the string representation of class instance Token"""
         return self.__str__()
-
-
