@@ -1,15 +1,26 @@
 # Token types:
-(INTEGER, PLUS, EOF, MINUS,
- DIVIDE, MULTIPLY,
- LPARAN, RPARAN, BEGIN,
- END, DOT, ASSIGN,
- SEMI, ID, PROGRAM, VAR, INTEGER_DIV,
- FLOAT_DIV, COLON, COMMA,
- REAL, INTEGER_CONST, REAL_CONST,) = ('INTEGER', 'PLUS', 'EOF', 'MINUS', 'DIVIDE',
-                                      'MULTIPLY', '(', ')', 'BEGIN',
-                                      'END', 'DOT', 'ASSIGN', 'SEMI', 'ID', 'PROGRAM',
-                                      'VAR', 'INTEGER_DIV', 'FLOAT_DIV', 'COLON', 'COMMA', 'REAL', 'INTEGER_CONST',
-                                      'REAL_CONST')
+INTEGER = 'INTEGER'
+REAL = 'REAL'
+INTEGER_CONST = 'INTEGER_CONST'
+REAL_CONST = 'REAL_CONST'
+PLUS = 'PLUS'
+MINUS = 'MINUS'
+MULTIPLY = 'MULTIPLY'
+INTEGER_DIV = 'INTEGER_DIV'
+FLOAT_DIV = 'FLOAT_DIV'
+LPARAN = 'LPAREN'
+RPARAN = 'RPAREN'
+ID = 'ID'
+ASSIGN = 'ASSIGN'
+BEGIN = 'BEGIN'
+END = 'END'
+SEMI = 'SEMI'
+DOT = 'DOT'
+PROGRAM = 'PROGRAM'
+VAR = 'VAR'
+COLON = 'COLON'
+COMMA = 'COMMA'
+EOF = 'EOF'
 
 
 class Token(object):

@@ -1,57 +1,71 @@
-import my_tokens
 
 
 class AbstractSyntaxTree(object):
     pass
 
 
-class UnaryOperatorNode(AbstractSyntaxTree):
-
-    def __init__(self, operator, expression):
-        self.token = self.operator = operator
-        # expression represents an AST node
-        self.expression = expression
-
-
-# Operator representation
 class BinaryOperatorNode(AbstractSyntaxTree):
-
     def __init__(self, left_node, operator, right_node):
         self.left_node = left_node
-        self.right_node = right_node
         self.token = self.operator = operator
+        self.right_node = right_node
 
 
-# Integer representation
 class Number(AbstractSyntaxTree):
-
-    def __init__(self, token: my_tokens.Token):
+    def __init__(self, token):
         self.token = token
         self.value = token.value
 
 
-class Compound(AbstractSyntaxTree):
-    """Represents a BEGIN ... END block"""
+class UnaryOperatorNode(AbstractSyntaxTree):
+    def __init__(self, operator, expression):
+        self.token = self.operator = operator
+        self.expression = expression
 
+
+class Compound(AbstractSyntaxTree):
+    """Represents a 'BEGIN ... END' block"""
     def __init__(self):
         self.children = []
 
 
 class Assign(AbstractSyntaxTree):
-
     def __init__(self, left_node, operator, right_node):
         self.left_node = left_node
-        self.right_node = right_node
         self.token = self.operator = operator
+        self.right_node = right_node
 
 
 class Variable(AbstractSyntaxTree):
-    """The variable node is constructed using ID tokens"""
+    """The Var node is constructed out of ID token."""
+    def __init__(self, token):
+        self.token = token
+        self.value = token.value
 
-    def __init__(self, this_token: my_tokens.Token):
-        self.token = this_token
-        self.value = this_token.value
 
-
-class NoStatements(object):
+class NoStatements(AbstractSyntaxTree):
     pass
+
+
+class Program(AbstractSyntaxTree):
+    def __init__(self, name, block):
+        self.name = name
+        self.block = block
+
+
+class Block(AbstractSyntaxTree):
+    def __init__(self, declarations, compound_statement):
+        self.declarations = declarations
+        self.compound_statement = compound_statement
+
+
+class VariableDeclaration(AbstractSyntaxTree):
+    def __init__(self, var_node, type_node):
+        self.var_node = var_node
+        self.type_node = type_node
+
+
+class Type(AbstractSyntaxTree):
+    def __init__(self, token):
+        self.token = token
+        self.value = token.value

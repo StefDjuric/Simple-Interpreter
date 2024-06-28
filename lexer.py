@@ -1,144 +1,150 @@
 import my_tokens
 
 RESERVED_KEYWORDS = {
-    'BEGIN': my_tokens.Token('BEGIN', 'BEGIN'),
-    'END': my_tokens.Token('END', 'END'),
     'PROGRAM': my_tokens.Token('PROGRAM', 'PROGRAM'),
     'VAR': my_tokens.Token('VAR', 'VAR'),
-    'DIV': my_tokens.Token('DIV', 'DIV'),
+    'DIV': my_tokens.Token('INTEGER_DIV', 'DIV'),
     'INTEGER': my_tokens.Token('INTEGER', 'INTEGER'),
     'REAL': my_tokens.Token('REAL', 'REAL'),
+    'BEGIN': my_tokens.Token('BEGIN', 'BEGIN'),
+    'END': my_tokens.Token('END', 'END'),
 }
 
 
 class Lexer(object):
     def __init__(self, text):
-        # text as in code that gets interpreted
         self.text = text
-        # index position of text
         self.curr_idx_position = 0
-        self.curr_char = self.text[self.curr_idx_position]
+        self.current_char = self.text[self.curr_idx_position]
 
-    def error(self) -> None:
+    def error(self):
         raise Exception('Invalid character')
 
+    def advance(self):
+        """Advance the `curr_idx_position` pointer and set the `current_char` variable."""
+        self.curr_idx_position += 1
+        if self.curr_idx_position > len(self.text) - 1:
+            self.current_char = None
+        else:
+            self.current_char = self.text[self.curr_idx_position]
+
+    def peek(self):
+        peek_curr_idx_position = self.curr_idx_position + 1
+        if peek_curr_idx_position > len(self.text) - 1:
+            return None
+        else:
+            return self.text[peek_curr_idx_position]
+
     def skip_whitespace(self):
-        while self.curr_char is not None and self.curr_char.isspace():
+        while self.current_char is not None and self.current_char.isspace():
             self.advance()
 
     def skip_comment(self):
-        while self.curr_char != '}':
+        while self.current_char != '}':
             self.advance()
-        self.advance()
-
-    def advance(self) -> None:
-        """Advance the 'curr_idx_position' pointer and set the 'current_char' variable."""
-        self.curr_idx_position += 1
-        if self.curr_idx_position > len(self.text) - 1:
-            self.curr_char = None  # Indicates end of input
-        else:
-            self.curr_char = self.text[self.curr_idx_position]
+        self.advance()  # the closing curly brace
 
     def number(self):
-        """Returns a (multi digit) number(float const or integer const) consumed from the input."""
-        number_buffer = ''
-        while self.curr_char is not None and self.curr_char.isdigit():
-            number_buffer += self.curr_char
+        """Return a (multidigit) integer or float consumed from the input."""
+        result = ''
+        while self.current_char is not None and self.current_char.isdigit():
+            result += self.current_char
             self.advance()
 
-        if self.curr_char == '.':
-            number_buffer += self.curr_char
+        if self.current_char == '.':
+            result += self.current_char
             self.advance()
 
-            while self.curr_char is not None and self.curr_char.isdigit():
-                number_buffer += self.curr_char
+            while (
+                self.current_char is not None and
+                self.current_char.isdigit()
+            ):
+                result += self.current_char
                 self.advance()
-            this_token = my_tokens.Token('REAL_CONST', float(number_buffer))
-        else:
-            this_token = my_tokens.Token('INTEGER_CONST', int(number_buffer))
-        return this_token
 
-    def peek(self):
-        """Peeks into the next position of the text without moving the index position"""
-        peek_pos = self.curr_idx_position + 1
-        if peek_pos > len(self.text) - 1:
-            return None
+            token = my_tokens.Token('REAL_CONST', float(result))
         else:
-            return self.text[peek_pos]
+            token = my_tokens.Token('INTEGER_CONST', int(result))
+
+        return token
 
     def _id(self):
-        """Handles identifiers and reserved keywords"""
+        """Handle identifiers and reserved keywords"""
         result = ''
-        while self.curr_char is not None and self.curr_char.isalnum():
-            result += self.curr_char
+        while self.current_char is not None and self.current_char.isalnum():
+            result += self.current_char
             self.advance()
-        this_token = RESERVED_KEYWORDS.get(result.upper(), my_tokens.Token(my_tokens.ID, result))
-        return this_token
 
-    def tokenizer(self) -> my_tokens.Token:
-        """This method breaks text down into tokens"""
+        my_token = RESERVED_KEYWORDS.get(result, my_tokens.Token(my_tokens.ID, result))
+        return my_token
 
-        while self.curr_char is not None:
+    def tokenizer(self):
+        """Lexical analyzer (also known as scanner or my_tokens.Tokennizer)
 
-            if self.curr_char.isdigit():
-                return self.number()
+        This method is responsible for breaking a sentence
+        apart into my_tokens.Tokens. One my_tokens.Token at a time.
+        """
+        while self.current_char is not None:
 
-            elif self.curr_char == '{':
+            if self.current_char.isspace():
+                self.skip_whitespace()
+                continue
+
+            if self.current_char == '{':
                 self.advance()
                 self.skip_comment()
                 continue
 
-            elif self.curr_char == ':':
-                self.advance()
-                return my_tokens.Token(my_tokens.COLON, ':')
-
-            elif self.curr_char == ',':
-                self.advance()
-                return my_tokens.Token(my_tokens.COMMA, ',')
-
-            elif self.curr_char.isspace():
-                self.skip_whitespace()
-                continue
-
-            elif self.curr_char.isalpha():
+            if self.current_char.isalpha():
                 return self._id()
 
-            elif self.curr_char == ':' and self.peek() == '=':
+            if self.current_char.isdigit():
+                return self.number()
+
+            if self.current_char == ':' and self.peek() == '=':
                 self.advance()
                 self.advance()
                 return my_tokens.Token(my_tokens.ASSIGN, ':=')
 
-            elif self.curr_char == ';':
+            if self.current_char == ';':
                 self.advance()
                 return my_tokens.Token(my_tokens.SEMI, ';')
 
-            elif self.curr_char == '.':
+            if self.current_char == ':':
                 self.advance()
-                return my_tokens.Token(my_tokens.DOT, '.')
+                return my_tokens.Token(my_tokens.COLON, ':')
 
-            elif self.curr_char == '+':
+            if self.current_char == ',':
+                self.advance()
+                return my_tokens.Token(my_tokens.COMMA, ',')
+
+            if self.current_char == '+':
                 self.advance()
                 return my_tokens.Token(my_tokens.PLUS, '+')
 
-            elif self.curr_char == '-':
+            if self.current_char == '-':
                 self.advance()
                 return my_tokens.Token(my_tokens.MINUS, '-')
 
-            elif self.curr_char == '*':
+            if self.current_char == '*':
                 self.advance()
                 return my_tokens.Token(my_tokens.MULTIPLY, '*')
 
-            elif self.curr_char == '/':
+            if self.current_char == '/':
                 self.advance()
                 return my_tokens.Token(my_tokens.FLOAT_DIV, '/')
 
-            elif self.curr_char == '(':
+            if self.current_char == '(':
                 self.advance()
                 return my_tokens.Token(my_tokens.LPARAN, '(')
 
-            elif self.curr_char == ')':
+            if self.current_char == ')':
                 self.advance()
                 return my_tokens.Token(my_tokens.RPARAN, ')')
+
+            if self.current_char == '.':
+                self.advance()
+                return my_tokens.Token(my_tokens.DOT, '.')
 
             self.error()
 

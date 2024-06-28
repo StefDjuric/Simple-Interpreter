@@ -1,21 +1,18 @@
 import interpreter
 from lexer import Lexer
+import sys
 
 
 def main():
-    while True:
-        try:
-            text = input('spi> ')
-        except EOFError:
-            break
-        if not text:
-            continue
+    text = open(sys.argv[1], 'r').read()
 
-        lexer = Lexer(text)
-        parser = interpreter.Parser(lexer)
-        this_interpreter = interpreter.Interpreter(parser)
-        this_interpreter.interpret()
-        print(this_interpreter.GLOBAL_SCOPE)
+    my_lexer = Lexer(text)
+    parser = interpreter.Parser(my_lexer)
+    this_interpreter = interpreter.Interpreter(parser)
+    result = this_interpreter.interpret()
+
+    for k, v in sorted(this_interpreter.GLOBAL_SCOPE.items()):
+        print('{} = {}'.format(k, v))
 
 
 if __name__ == '__main__':
