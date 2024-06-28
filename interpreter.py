@@ -1,6 +1,6 @@
 import my_tokens
 import AST
-
+import symbol
 
 class Parser(object):
     def __init__(self, lexer):
@@ -273,6 +273,57 @@ class Interpreter(NodeVisitor):
     def visit_Type(self, node):
         pass
 
+
     def interpret(self):
         tree = self.parser.parse()
         return self.visit(tree)
+
+
+class SymbolTableBuilder(NodeVisitor):
+    def __init__(self):
+        self.symbol_table = symbol.SymbolTable()
+
+    def visit_Block(self, node: AST.Block):
+        for declaration in node.declarations:
+            self.visit(declaration)
+        self.visit(node.compound_statement)
+
+    def visit_Program(self, node: AST.Program):
+        self.visit(node.block)
+
+    def visit_BinaryOperatorNode(self, node: AST.BinaryOperatorNode):
+        self.visit(node.left_node)
+        self.visit(node.right_node)
+
+    def visit_Number(self, node: AST.Number):
+        pass
+
+    def visit_UnaryOperatorNode(self, node: AST.UnaryOperatorNode):
+        self.visit(node.expression)
+
+    def visit_Compound(self, node: AST.Compound):
+        for child in node.children:
+            self.visit(child)
+
+    def visit_NoStatements(self, node:AST.NoStatements):
+        pass
+
+    def visit_VariableDeclaration(self, node: AST.VariableDeclaration):
+        type_name = node.type_node.value
+        type_symbol = self.symbol_table.lookup(type_name)
+        var_name = node.var_node.value
+        var_symbol = symbol.VariableSymbol(var_name, type_symbol)
+        self.symbol_table.define(var_symbol)
+
+    def visit_Assign(self, node: AST.Assign):
+        var_name = node.left_node.value
+        var_symbol = self.symbol_table.lookup(var_name)
+        if var_symbol is None:
+            raise NameError(repr(var_name))
+        self.visit(node.right_node)
+
+    def visit_Variable(self, node: AST.Variable):
+        var_name = node.value
+        var_symbol = self.symbol_table.lookup(var_name)
+        if var_symbol is None:
+            raise NameError(repr(var_name))
