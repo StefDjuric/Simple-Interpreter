@@ -8,6 +8,7 @@ RESERVED_KEYWORDS = {
     'REAL': my_tokens.Token('REAL', 'REAL'),
     'BEGIN': my_tokens.Token('BEGIN', 'BEGIN'),
     'END': my_tokens.Token('END', 'END'),
+    'PROCEDURE': my_tokens.Token('PROCEDURE', 'PROCEDURE')
 }
 
 

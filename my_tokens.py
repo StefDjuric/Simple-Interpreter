@@ -21,7 +21,7 @@ VAR = 'VAR'
 COLON = 'COLON'
 COMMA = 'COMMA'
 EOF = 'EOF'
-
+PROCEDURE = 'PROCEDURE'
 
 class Token(object):
 

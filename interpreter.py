@@ -41,10 +41,21 @@ class Parser(object):
         declarations = []
         if self.current_token.type == my_tokens.VAR:
             self.eat(my_tokens.VAR)
+
             while self.current_token.type == my_tokens.ID:
                 var_declaration = self.variable_declaration()
                 declarations.extend(var_declaration)
                 self.eat(my_tokens.SEMI)
+
+        while self.current_token.type == my_tokens.PROCEDURE:
+            self.eat(my_tokens.PROCEDURE)
+            procedure_name = self.current_token.value
+            self.eat(my_tokens.ID)
+            self.eat(my_tokens.SEMI)
+            block_node = self.block()
+            procedure_declaration = AST.ProcedureDeclaration(procedure_name, block_node)
+            declarations.append(procedure_declaration)
+            self.eat(my_tokens.SEMI)
 
         return declarations
 
@@ -213,9 +224,9 @@ class NodeVisitor(object):
 
 
 class Interpreter(NodeVisitor):
-    def __init__(self, parser):
-        self.GLOBAL_SCOPE: dict = {}
-        self.parser = parser
+    def __init__(self, tree):
+        self.GLOBAL_MEMORY: dict = {}
+        self.tree = tree
 
     def visit_BinaryOperatorNode(self, node: AST.BinaryOperatorNode):
         if node.operator.type == my_tokens.PLUS:
@@ -249,11 +260,11 @@ class Interpreter(NodeVisitor):
 
     def visit_Assign(self, node: AST.Assign):
         var_name = node.left_node.value
-        self.GLOBAL_SCOPE[var_name] = self.visit(node.right_node)
+        self.GLOBAL_MEMORY[var_name] = self.visit(node.right_node)
 
     def visit_Variable(self, node: AST.Variable):
         var_name = node.value
-        value = self.GLOBAL_SCOPE.get(var_name)
+        value = self.GLOBAL_MEMORY.get(var_name)
         if value is None:
             raise NameError(repr(var_name))
         else:
@@ -273,9 +284,13 @@ class Interpreter(NodeVisitor):
     def visit_Type(self, node):
         pass
 
+    def visit_ProcedureDeclaration(self, node):
+        pass
 
     def interpret(self):
-        tree = self.parser.parse()
+        tree = self.tree
+        if tree is None:
+            return ''
         return self.visit(tree)
 
 
@@ -327,3 +342,6 @@ class SymbolTableBuilder(NodeVisitor):
         var_symbol = self.symbol_table.lookup(var_name)
         if var_symbol is None:
             raise NameError(repr(var_name))
+
+    def visit_ProcedureDeclaration(self, node: AST.ProcedureDeclaration):
+        pass
