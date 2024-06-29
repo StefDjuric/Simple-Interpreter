@@ -40,12 +40,13 @@ class Parser(object):
 
         declarations = []
         if self.current_token.type == my_tokens.VAR:
-            self.eat(my_tokens.VAR)
-
-            while self.current_token.type == my_tokens.ID:
-                var_declaration = self.variable_declaration()
-                declarations.extend(var_declaration)
-                self.eat(my_tokens.SEMI)
+            while self.current_token.type == my_tokens.VAR:
+                self.eat(my_tokens.VAR)
+                # TODO: ADDED THIS WHILE LOOP MAYBE IT BREAKS EVERYTHING
+                while self.current_token.type == my_tokens.ID:
+                    var_declaration = self.variable_declaration()
+                    declarations.extend(var_declaration)
+                    self.eat(my_tokens.SEMI)
 
         while self.current_token.type == my_tokens.PROCEDURE:
             self.eat(my_tokens.PROCEDURE)
