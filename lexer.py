@@ -76,7 +76,7 @@ class Lexer(object):
             result += self.current_char
             self.advance()
 
-        my_token = RESERVED_KEYWORDS.get(result, my_tokens.Token(my_tokens.ID, result))
+        my_token = RESERVED_KEYWORDS.get(result.upper(), my_tokens.Token(my_tokens.ID, result))
         return my_token
 
     def tokenizer(self):

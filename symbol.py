@@ -1,6 +1,3 @@
-import symbol
-
-
 class Symbol(object):
 
     def __init__(self, name, type=None):
@@ -16,7 +13,8 @@ class BuiltInTypeSymbol(Symbol):
     def __str__(self):
         return self.name
 
-    __repr__ = __str__
+    def __repr__(self):
+        return f"<{self.__class__.__name__}(name='{self.name}')>"
 
 
 class VariableSymbol(Symbol):
@@ -24,7 +22,7 @@ class VariableSymbol(Symbol):
         super().__init__(name, type)
 
     def __str__(self):
-        return f'<{self.name}:{self.type}>'
+        return f'<{self.__class__.__name__} (name={self.name}), type={self.type}>'
 
     __repr__ = __str__
 
@@ -36,11 +34,19 @@ class SymbolTable(object):
         self._init_builtins()
 
     def _init_builtins(self):
-        self.define(BuiltInTypeSymbol('INTEGER'))
-        self.define(BuiltInTypeSymbol('REAL'))
+        self.insert(BuiltInTypeSymbol('INTEGER'))
+        self.insert(BuiltInTypeSymbol('REAL'))
 
     def __str__(self):
-        return f'Symbols: {[value for value in self.symbols.values()]}'
+        symtab_header = 'Symbol table contents'
+        lines = ['\n', symtab_header, '_' * len(symtab_header)]
+        lines.extend(
+            ('%7s: %r' % (key, value))
+            for key, value in self.symbols.items()
+        )
+        lines.append('\n')
+        s = '\n'.join(lines)
+        return s
 
     __repr__ = __str__
 
@@ -48,7 +54,11 @@ class SymbolTable(object):
         print(f'Define: {symbol}')
         self.symbols[symbol.name] = symbol
 
-    def lookup(self, name) -> symbol.Symbol:
+    def lookup(self, name) -> Symbol:
         print(f'Lookup: {name}')
         symbol = self.symbols.get(name)
         return symbol
+
+    def insert(self, this_symbol: Symbol):
+        print(f'Insert: {this_symbol.name}')
+        self.symbols[this_symbol.name] = this_symbol

@@ -345,3 +345,52 @@ class SymbolTableBuilder(NodeVisitor):
 
     def visit_ProcedureDeclaration(self, node: AST.ProcedureDeclaration):
         pass
+
+
+class SemanticAnalyzer(NodeVisitor):
+    def __init__(self):
+        self.symtab = symbol.SymbolTable()
+
+    def visit_Block(self, node):
+        for declaration in node.declarations:
+            self.visit(declaration)
+        self.visit(node.compound_statement)
+
+    def visit_Program(self, node):
+        self.visit(node.block)
+
+    def visit_Compound(self, node):
+        for child in node.children:
+            self.visit(child)
+
+    def visit_NoStatements(self, node):
+        pass
+
+    def visit_VariableDeclaration(self, node:AST.VariableDeclaration):
+
+        type_name = node.type_node.value
+        type_symbol = self.symtab.lookup(type_name)
+
+        var_name = node.var_node.value
+        var_symbol = symbol.VariableSymbol(var_name, type_symbol)
+
+        if self.symtab.lookup(var_name) is not None:
+            raise Exception(
+                f"Error: Duplicate identifier {var_name} found"
+            )
+
+        self.symtab.insert(var_symbol)
+
+    def visit_Variable(self, node):
+        var_name = node.value
+        var_symbol = self.symtab.lookup(var_name)
+
+    def visit_Assign(self, node: AST.Assign):
+        # right-hand side
+        self.visit(node.right_node)
+        # left-hand side
+        self.visit(node.left_node)
+
+    def visit_BinaryOperatorNode(self, node: AST.BinaryOperatorNode):
+        self.visit(node.left_node)
+        self.visit(node.right_node)
